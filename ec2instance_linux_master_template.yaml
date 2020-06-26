@@ -19,29 +19,6 @@ Metadata:
         default: Optional Parameters
       Parameters:
         - EC2KeyPair
-    ParameterLabels:
-      InstanceName:
-        default: Instance Name
-      EC2KeyPair:
-        default: EC2 Key Pair
-      OperatingSystem:
-        default: Operating System
-      # VPC:
-      #   default: VPC ID
-      # Subnet:
-      #   default: Subnet for server
-      # SecurityGroup:
-      #   default: Instance Security Group
-      # EC2VolumeSize:
-      #   default: EC2 Volume Size
-      # EC2VolumeType:
-      #   default: EC2 Volume Type
-      # EBSOptimized:
-      #   default: EBS Optimized
-      # BlockDeviceDeleteOnTermination:
-      #   default: Block Device DeleteOn Termination
-      InstanceType:
-        default: Instance Type
 Parameters:
   InstanceName:
     Description: Mention the name for your EC2 Instance
@@ -264,7 +241,7 @@ Resources:
           AssociatePublicIpAddress: true
           DeviceIndex: '0'
           DeleteOnTermination: true
-          SubnetId: !Ref 'Subnet'
+          # SubnetId: !Ref 'Subnet'
       KeyName: !If
         - HasSSHKey
         - !Ref 'EC2KeyPair'

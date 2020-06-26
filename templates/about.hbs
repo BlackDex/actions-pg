@@ -1,0 +1,14 @@
+{{#*inline "page"}}
+
+<section id="about">
+  <h1>Here's another page!</h1>
+  <img src="/static/technative.png" />
+  <ul>
+    {{#each items}}
+      <li>{{ this }}</li>
+    {{/each}}
+  </ul>
+</section>
+
+{{/inline}}
+{{~> (parent)~}}

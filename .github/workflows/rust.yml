@@ -53,13 +53,3 @@ jobs:
         name: GitubActions
         template: ec2instance_linux_master_template.yaml
         capabilities: CAPABILITY_NAMED_IAM
-
-
-Check failure on line 34 in .github/workflows/rust.yml
-
-GitHub Actions / Rust
-
-Invalid workflow file
-
-The workflow is not valid. .github/workflows/rust.yml (Line: 34, Col: 15): Expected format {org}/{repo}[/path]@ref. Actual 'actionsdownload-artifact@master',Input string was not in a correct format.
-

@@ -7,6 +7,7 @@ Metadata:
         Parameters:
           - InstanceName
           - OperatingSystem
+          - InstanceType
           # - VPC
           # - Subnet
           # - EC2VolumeSize
@@ -14,34 +15,33 @@ Metadata:
           # - EBSOptimized
           # - BlockDeviceDeleteOnTermination
           # - SecurityGroup
-          - InstanceType
       - Label:
           default: Optional Parameters
         Parameters:
           - EC2KeyPair
-    ParameterLabels:
-      # VPC:
-      #   default: VPC ID
-      # Subnet:
-      #   default: Subnet for server
-      InstanceName:
-        default: Instance Name
-      # SecurityGroup:
-      #   default: Instance Security Group
-      EC2KeyPair:
-        default: EC2 Key Pair
-      OperatingSystem:
-        default: Operating System
-      # EC2VolumeSize:
-      #   default: EC2 Volume Size
-      # EC2VolumeType:
-      #   default: EC2 Volume Type
-      # EBSOptimized:
-      #   default: EBS Optimized
-      # BlockDeviceDeleteOnTermination:
-      #   default: Block Device DeleteOn Termination
-      InstanceType:
-        default: Instance Type
+ParameterLabels:
+  InstanceName:
+    default: Instance Name
+  EC2KeyPair:
+    default: EC2 Key Pair
+  OperatingSystem:
+    default: Operating System
+  # VPC:
+  #   default: VPC ID
+  # Subnet:
+  #   default: Subnet for server
+  # SecurityGroup:
+  #   default: Instance Security Group
+  # EC2VolumeSize:
+  #   default: EC2 Volume Size
+  # EC2VolumeType:
+  #   default: EC2 Volume Type
+  # EBSOptimized:
+  #   default: EBS Optimized
+  # BlockDeviceDeleteOnTermination:
+  #   default: Block Device DeleteOn Termination
+  InstanceType:
+    default: Instance Type
 Parameters:
   InstanceName:
     Description: Mention the name for your EC2 Instance
@@ -109,6 +109,12 @@ Parameters:
   #     - 'false'
 Mappings:
   LatestAmiMap:
+    eu-west-1:
+      AmazonLinux2: ami-099a8245f5daa82bf
+      AmazonLinuxHVM: ami-0e61341fa75fcaa18
+      UbuntuServerHVM: ami-035966e8adab4aaad
+      RedHatEnterpriseLinux8: ami-04facb3ed127a2eb6
+      SUSELinuxEnterpriseServer15: ami-0e35876ae3de666cd
     # us-east-2:
     #   AmazonLinux2: ami-02ccb28830b645a41
     #   AmazonLinuxHVM: ami-0d542ef84ec55d71c
@@ -175,12 +181,6 @@ Mappings:
     #   UbuntuServerHVM: ami-0b418580298265d5c
     #   RedHatEnterpriseLinux8: ami-0badcc5b522737046
     #   SUSELinuxEnterpriseServer15: ami-0ca9e27238973cf36
-    eu-west-1:
-      AmazonLinux2: ami-099a8245f5daa82bf
-      AmazonLinuxHVM: ami-0e61341fa75fcaa18
-      UbuntuServerHVM: ami-035966e8adab4aaad
-      RedHatEnterpriseLinux8: ami-04facb3ed127a2eb6
-      SUSELinuxEnterpriseServer15: ami-0e35876ae3de666cd
     # eu-west-2:
     #   AmazonLinux2: ami-0389b2a3c4948b1a0
     #   AmazonLinuxHVM: ami-050b8344d77081f4b

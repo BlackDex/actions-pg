@@ -9,7 +9,7 @@ Metadata:
         - OperatingSystem
         - InstanceType
         # - VPC
-        # - Subnet
+        - Subnet
         # - EC2VolumeSize
         # - EC2VolumeType
         # - EBSOptimized
@@ -45,10 +45,10 @@ Parameters:
   #   Description: The ID of your existing VPC (e.g., vpc-0343606e)
   #   Type: AWS::EC2::VPC::Id
   #   Default: <VPC-ID>
-  # Subnet:
-  #   Description: Choose the Subnet to Deploy Instances.
-  #   Type: AWS::EC2::Subnet::Id
-  #   Default: <Subnet-Id>
+  Subnet:
+    Description: Choose the Subnet to Deploy Instances.
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-9e741fc4
   # SecurityGroup:
   #   Description: Select an existing security group.
   #   Type: AWS::EC2::SecurityGroup::Id
@@ -211,7 +211,6 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
         - arn:aws:iam::aws:policy/AmazonSSMFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
-      RoleName: !Sub '${AWS::StackName}-EC2Role'
   EC2Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -241,7 +240,7 @@ Resources:
           AssociatePublicIpAddress: true
           DeviceIndex: '0'
           DeleteOnTermination: true
-          # SubnetId: !Ref 'Subnet'
+          SubnetId: !Ref 'Subnet'
       KeyName: !If
         - HasSSHKey
         - !Ref 'EC2KeyPair'

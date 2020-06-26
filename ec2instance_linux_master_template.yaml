@@ -28,18 +28,6 @@ Parameters:
     Description: Mention KeyPair to Assign to EC2 Instances or leave blank
     Type: String
     Default: Mathijs-Laptop
-  # VPC:
-  #   Description: The ID of your existing VPC (e.g., vpc-0343606e)
-  #   Type: AWS::EC2::VPC::Id
-  #   Default: <VPC-ID>
-  # Subnet:
-  #   Description: Choose the Subnet to Deploy Instances.
-  #   Type: AWS::EC2::Subnet::Id
-  #   Default: <Subnet-Id>
-  # SecurityGroup:
-  #   Description: Select an existing security group.
-  #   Type: AWS::EC2::SecurityGroup::Id
-  #   Default: <Security Group>
   OperatingSystem:
     Description: Choose an Amazon Machine Image
     Type: String
@@ -53,6 +41,18 @@ Parameters:
     AllowedValues:
       - t2.micro
     ConstraintDescription: Must be a valid EC2 instance type.
+  # VPC:
+  #   Description: The ID of your existing VPC (e.g., vpc-0343606e)
+  #   Type: AWS::EC2::VPC::Id
+  #   Default: <VPC-ID>
+  # Subnet:
+  #   Description: Choose the Subnet to Deploy Instances.
+  #   Type: AWS::EC2::Subnet::Id
+  #   Default: <Subnet-Id>
+  # SecurityGroup:
+  #   Description: Select an existing security group.
+  #   Type: AWS::EC2::SecurityGroup::Id
+  #   Default: <Security Group>
   # EC2VolumeSize:
   #   Description: Size of EC2 volume. Minimum 8 GiB
   #   Type: String

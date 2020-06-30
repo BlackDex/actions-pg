@@ -25,6 +25,7 @@ jobs:
           name: actions-pg
           path: target/release/actions-pg
 
+  # Deploy
   deploy:
     needs: build
     runs-on: ubuntu-latest

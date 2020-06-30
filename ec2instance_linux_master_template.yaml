@@ -349,12 +349,6 @@ Mappings:
       HVM64: ami-0f7937761741dc640
       HVMG2: NOT_SUPPORTED
 Resources:
-  IamInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: /
-      Roles:
-        - !Ref 'ProfileRole'
   EC2Instance:
     Type: 'AWS::EC2::Instance'
     Properties:

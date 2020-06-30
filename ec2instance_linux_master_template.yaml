@@ -1,266 +1,411 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Creates an Amazon EC2 instance and deploys an app file from specified S3 bucket
-Metadata:
-  AWS::CloudFormation::Interface:
-    - Label:
-        default: Instance Configurations
-      Parameters:
-        - InstanceName
-        - OperatingSystem
-        - InstanceType
-        # - VPC
-        - Subnet
-        # - EC2VolumeSize
-        # - EC2VolumeType
-        # - EBSOptimized
-        # - BlockDeviceDeleteOnTermination
-        # - SecurityGroup
-    - Label:
-        default: Optional Parameters
-      Parameters:
-        - EC2KeyPair
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Small example of using AWS CloudFormation and Github Actions.
 Parameters:
-  InstanceName:
-    Description: Mention the name for your EC2 Instance
-    Type: String
-    Default: action-pg
-  EC2KeyPair:
-    Description: Mention KeyPair to Assign to EC2 Instances or leave blank
-    Type: String
-    Default: Mathijs-Laptop
-  OperatingSystem:
-    Description: Choose an Amazon Machine Image
-    Type: String
-    Default: AmazonLinux2
-    AllowedValues:
-      - AmazonLinux2
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
   InstanceType:
-    Description: Choose an Instance Type.
+    Description: WebServer EC2 instance type
     Type: String
-    Default: t2.micro
+    Default: t2.small
     AllowedValues:
+      - t1.micro
+      - t2.nano
       - t2.micro
-    ConstraintDescription: Must be a valid EC2 instance type.
-  # VPC:
-  #   Description: The ID of your existing VPC (e.g., vpc-0343606e)
-  #   Type: AWS::EC2::VPC::Id
-  #   Default: <VPC-ID>
-  Subnet:
-    Description: Choose the Subnet to Deploy Instances.
-    Type: AWS::EC2::Subnet::Id
-    Default: subnet-9e741fc4
-  # SecurityGroup:
-  #   Description: Select an existing security group.
-  #   Type: AWS::EC2::SecurityGroup::Id
-  #   Default: <Security Group>
-  # EC2VolumeSize:
-  #   Description: Size of EC2 volume. Minimum 8 GiB
-  #   Type: String
-  #   Default: 30
-  # EC2VolumeType:
-  #   Description: Choose General Purpose SSD(gp2), Provisioned IOPS SSD (io1), Magnetic
-  #     (standard)
-  #   Type: String
-  #   AllowedValues:
-  #     - gp2
-  #     - io1
-  #     - standard
-  #   Default: gp2
-  # BlockDeviceDeleteOnTermination:
-  #   Description: >-
-  #     When an instance is terminated, Amazon EC2 uses the value of the DeleteOnTermination
-  #     attribute for each attached EBS volume to determine whether to preserve or delete
-  #     the volume when the instance is terminated.
-  #   Type: String
-  #   Default: 'true'
-  #   AllowedValues:
-  #     - 'true'
-  #     - 'false'
-  # EBSOptimized:
-  #   Description: Choose whether the instance is optimized for Amazon EBS I/O. Choose
-  #     only InstanceType that supports this
-  #   Type: String
-  #   Default: 'false'
-  #   AllowedValues:
-  #     - 'true'
-  #     - 'false'
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m1.small
+      - m1.medium
+      - m1.large
+      - m1.xlarge
+      - m2.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+      - c1.medium
+      - c1.xlarge
+      - c3.large
+      - c3.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - g2.2xlarge
+      - g2.8xlarge
+      - r3.large
+      - r3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - i2.xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - d2.xlarge
+      - d2.2xlarge
+      - d2.4xlarge
+      - d2.8xlarge
+      - hi1.4xlarge
+      - hs1.8xlarge
+      - cr1.8xlarge
+      - cc2.8xlarge
+      - cg1.4xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  SSHLocation:
+    Description: The IP address range that can be used to SSH to the EC2 instances
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
 Mappings:
-  LatestAmiMap:
+  AWSInstanceType2Arch:
+    t1.micro:
+      Arch: HVM64
+    t2.nano:
+      Arch: HVM64
+    t2.micro:
+      Arch: HVM64
+    t2.small:
+      Arch: HVM64
+    t2.medium:
+      Arch: HVM64
+    t2.large:
+      Arch: HVM64
+    m1.small:
+      Arch: HVM64
+    m1.medium:
+      Arch: HVM64
+    m1.large:
+      Arch: HVM64
+    m1.xlarge:
+      Arch: HVM64
+    m2.xlarge:
+      Arch: HVM64
+    m2.2xlarge:
+      Arch: HVM64
+    m2.4xlarge:
+      Arch: HVM64
+    m3.medium:
+      Arch: HVM64
+    m3.large:
+      Arch: HVM64
+    m3.xlarge:
+      Arch: HVM64
+    m3.2xlarge:
+      Arch: HVM64
+    m4.large:
+      Arch: HVM64
+    m4.xlarge:
+      Arch: HVM64
+    m4.2xlarge:
+      Arch: HVM64
+    m4.4xlarge:
+      Arch: HVM64
+    m4.10xlarge:
+      Arch: HVM64
+    c1.medium:
+      Arch: HVM64
+    c1.xlarge:
+      Arch: HVM64
+    c3.large:
+      Arch: HVM64
+    c3.xlarge:
+      Arch: HVM64
+    c3.2xlarge:
+      Arch: HVM64
+    c3.4xlarge:
+      Arch: HVM64
+    c3.8xlarge:
+      Arch: HVM64
+    c4.large:
+      Arch: HVM64
+    c4.xlarge:
+      Arch: HVM64
+    c4.2xlarge:
+      Arch: HVM64
+    c4.4xlarge:
+      Arch: HVM64
+    c4.8xlarge:
+      Arch: HVM64
+    g2.2xlarge:
+      Arch: HVMG2
+    g2.8xlarge:
+      Arch: HVMG2
+    r3.large:
+      Arch: HVM64
+    r3.xlarge:
+      Arch: HVM64
+    r3.2xlarge:
+      Arch: HVM64
+    r3.4xlarge:
+      Arch: HVM64
+    r3.8xlarge:
+      Arch: HVM64
+    i2.xlarge:
+      Arch: HVM64
+    i2.2xlarge:
+      Arch: HVM64
+    i2.4xlarge:
+      Arch: HVM64
+    i2.8xlarge:
+      Arch: HVM64
+    d2.xlarge:
+      Arch: HVM64
+    d2.2xlarge:
+      Arch: HVM64
+    d2.4xlarge:
+      Arch: HVM64
+    d2.8xlarge:
+      Arch: HVM64
+    hi1.4xlarge:
+      Arch: HVM64
+    hs1.8xlarge:
+      Arch: HVM64
+    cr1.8xlarge:
+      Arch: HVM64
+    cc2.8xlarge:
+      Arch: HVM64
+  AWSInstanceType2NATArch:
+    t1.micro:
+      Arch: NATHVM64
+    t2.nano:
+      Arch: NATHVM64
+    t2.micro:
+      Arch: NATHVM64
+    t2.small:
+      Arch: NATHVM64
+    t2.medium:
+      Arch: NATHVM64
+    t2.large:
+      Arch: NATHVM64
+    m1.small:
+      Arch: NATHVM64
+    m1.medium:
+      Arch: NATHVM64
+    m1.large:
+      Arch: NATHVM64
+    m1.xlarge:
+      Arch: NATHVM64
+    m2.xlarge:
+      Arch: NATHVM64
+    m2.2xlarge:
+      Arch: NATHVM64
+    m2.4xlarge:
+      Arch: NATHVM64
+    m3.medium:
+      Arch: NATHVM64
+    m3.large:
+      Arch: NATHVM64
+    m3.xlarge:
+      Arch: NATHVM64
+    m3.2xlarge:
+      Arch: NATHVM64
+    m4.large:
+      Arch: NATHVM64
+    m4.xlarge:
+      Arch: NATHVM64
+    m4.2xlarge:
+      Arch: NATHVM64
+    m4.4xlarge:
+      Arch: NATHVM64
+    m4.10xlarge:
+      Arch: NATHVM64
+    c1.medium:
+      Arch: NATHVM64
+    c1.xlarge:
+      Arch: NATHVM64
+    c3.large:
+      Arch: NATHVM64
+    c3.xlarge:
+      Arch: NATHVM64
+    c3.2xlarge:
+      Arch: NATHVM64
+    c3.4xlarge:
+      Arch: NATHVM64
+    c3.8xlarge:
+      Arch: NATHVM64
+    c4.large:
+      Arch: NATHVM64
+    c4.xlarge:
+      Arch: NATHVM64
+    c4.2xlarge:
+      Arch: NATHVM64
+    c4.4xlarge:
+      Arch: NATHVM64
+    c4.8xlarge:
+      Arch: NATHVM64
+    g2.2xlarge:
+      Arch: NATHVMG2
+    g2.8xlarge:
+      Arch: NATHVMG2
+    r3.large:
+      Arch: NATHVM64
+    r3.xlarge:
+      Arch: NATHVM64
+    r3.2xlarge:
+      Arch: NATHVM64
+    r3.4xlarge:
+      Arch: NATHVM64
+    r3.8xlarge:
+      Arch: NATHVM64
+    i2.xlarge:
+      Arch: NATHVM64
+    i2.2xlarge:
+      Arch: NATHVM64
+    i2.4xlarge:
+      Arch: NATHVM64
+    i2.8xlarge:
+      Arch: NATHVM64
+    d2.xlarge:
+      Arch: NATHVM64
+    d2.2xlarge:
+      Arch: NATHVM64
+    d2.4xlarge:
+      Arch: NATHVM64
+    d2.8xlarge:
+      Arch: NATHVM64
+    hi1.4xlarge:
+      Arch: NATHVM64
+    hs1.8xlarge:
+      Arch: NATHVM64
+    cr1.8xlarge:
+      Arch: NATHVM64
+    cc2.8xlarge:
+      Arch: NATHVM64
+  AWSRegionArch2AMI:
+    us-east-1:
+      HVM64: ami-0080e4c5bc078760e
+      HVMG2: ami-0aeb704d503081ea6
+    us-west-2:
+      HVM64: ami-01e24be29428c15b2
+      HVMG2: ami-0fe84a5b4563d8f27
+    us-west-1:
+      HVM64: ami-0ec6517f6edbf8044
+      HVMG2: ami-0a7fc72dc0e51aa77
     eu-west-1:
-      AmazonLinux2: ami-099a8245f5daa82bf
-      AmazonLinuxHVM: ami-0e61341fa75fcaa18
-      UbuntuServerHVM: ami-035966e8adab4aaad
-      RedHatEnterpriseLinux8: ami-04facb3ed127a2eb6
-      SUSELinuxEnterpriseServer15: ami-0e35876ae3de666cd
-    # us-east-2:
-    #   AmazonLinux2: ami-02ccb28830b645a41
-    #   AmazonLinuxHVM: ami-0d542ef84ec55d71c
-    #   UbuntuServerHVM: ami-0fc20dd1da406780b
-    #   RedHatEnterpriseLinux8: ami-0520e698dd500b1d1
-    #   SUSELinuxEnterpriseServer15: ami-04c5bab51cc146925
-    # us-east-1:
-    #   AmazonLinux2: ami-0a887e401f7654935
-    #   AmazonLinuxHVM: ami-0e2ff28bfb72a4e45
-    #   UbuntuServerHVM: ami-07ebfd5b3428b6f4d
-    #   RedHatEnterpriseLinux8: ami-0c322300a1dd5dc79
-    #   SUSELinuxEnterpriseServer15: ami-0df6cfabfbe4385b7
-    # us-west-1:
-    #   AmazonLinux2: ami-01c94064639c71719
-    #   AmazonLinuxHVM: ami-021bb9f371690f97a
-    #   UbuntuServerHVM: ami-03ba3948f6c37a4b0
-    #   RedHatEnterpriseLinux8: ami-00fc224d9834053d6
-    #   SUSELinuxEnterpriseServer15: ami-0876607e590fc6ea2
-    # us-west-2:
-    #   AmazonLinux2: ami-0e8c04af2729ff1bb
-    #   AmazonLinuxHVM: ami-079f731edfe27c29c
-    #   UbuntuServerHVM: ami-0d1cd67c26f5fca19
-    #   RedHatEnterpriseLinux8: ami-087c2c50437d0b80d
-    #   SUSELinuxEnterpriseServer15: ami-0fde69c9f9f78ae47
-    # ap-south-1:
-    #   AmazonLinux2: ami-0d9462a653c34dab7
-    #   AmazonLinuxHVM: ami-05695932c5299858a
-    #   UbuntuServerHVM: ami-0620d12a9cf777c87
-    #   RedHatEnterpriseLinux8: ami-0a74bfeb190bd404f
-    #   SUSELinuxEnterpriseServer15: ami-0e0e7b909aea48186
-    # ap-northeast-1:
-    #   AmazonLinux2: ami-0af1df87db7b650f4
-    #   AmazonLinuxHVM: ami-02ddf94e5edc8e904
-    #   UbuntuServerHVM: ami-07f4cb4629342979c
-    #   RedHatEnterpriseLinux8: ami-09f31cc5d5eecca1a
-    #   SUSELinuxEnterpriseServer15: ami-0938c69b468a7051d
-    # ap-northeast-2:
-    #   AmazonLinux2: ami-0a93a08544874b3b7
-    #   AmazonLinuxHVM: ami-0ecd78c22823e02ef
-    #   UbuntuServerHVM: ami-0cd7b0de75f5a35d1
-    #   RedHatEnterpriseLinux8: ami-0dbadd8c47cf535fd
-    #   SUSELinuxEnterpriseServer15: ami-07d0b6ce73229c4b7
-    # ap-southeast-1:
-    #   AmazonLinux2: ami-0f02b24005e4aec36
-    #   AmazonLinuxHVM: ami-043afc2b8b6cfba5c
-    #   UbuntuServerHVM: ami-09a4a9ce71ff3f20b
-    #   RedHatEnterpriseLinux8: ami-04a2d6660f1296314
-    #   SUSELinuxEnterpriseServer15: ami-09e92ffa316727386
-    # ap-southeast-2:
-    #   AmazonLinux2: ami-0f767afb799f45102
-    #   AmazonLinuxHVM: ami-01393ce9a3ca55d67
-    #   UbuntuServerHVM: ami-02a599eb01e3b3c5b
-    #   RedHatEnterpriseLinux8: ami-0975ce566eec139c3
-    #   SUSELinuxEnterpriseServer15: ami-091b747bf704fde4f
-    # ca-central-1:
-    #   AmazonLinux2: ami-00db12b46ef5ebc36
-    #   AmazonLinuxHVM: ami-0fa94ecf2fef3420b
-    #   UbuntuServerHVM: ami-0d0eaed20348a3389
-    #   RedHatEnterpriseLinux8: ami-0b85d4ff00de6a225
-    #   SUSELinuxEnterpriseServer15: ami-0fe692b6f0aec8614
-    # eu-central-1:
-    #   AmazonLinux2: ami-0df0e7600ad0913a9
-    #   AmazonLinuxHVM: ami-0ba441bdd9e494102
-    #   UbuntuServerHVM: ami-0b418580298265d5c
-    #   RedHatEnterpriseLinux8: ami-0badcc5b522737046
-    #   SUSELinuxEnterpriseServer15: ami-0ca9e27238973cf36
-    # eu-west-2:
-    #   AmazonLinux2: ami-0389b2a3c4948b1a0
-    #   AmazonLinuxHVM: ami-050b8344d77081f4b
-    #   UbuntuServerHVM: ami-006a0174c6c25ac06
-    #   RedHatEnterpriseLinux8: ami-0a0cb6c7bcb2e4c51
-    #   SUSELinuxEnterpriseServer15: ami-05289a1dd768ff016
-    # eu-west-3:
-    #   AmazonLinux2: ami-0fd9bce3a3384b635
-    #   AmazonLinuxHVM: ami-053418e626d0549fc
-    #   UbuntuServerHVM: ami-096b8af6e7e8fb927
-    #   RedHatEnterpriseLinux8: ami-0556a158653dad0ba
-    #   SUSELinuxEnterpriseServer15: ami-06ad06c11b8de4377
-    # eu-north-1:
-    #   AmazonLinux2: ami-074a0e4318181e9d9
-    #   AmazonLinuxHVM: ami-01a7a49829bda9d79
-    #   UbuntuServerHVM: ami-0b7937aeb16a7eb94
-    #   RedHatEnterpriseLinux8: ami-9f35bde1
-    #   SUSELinuxEnterpriseServer15: ami-002480fb4157869fe
-    # sa-east-1:
-    #   AmazonLinux2: ami-080a223be3de0c3b8
-    #   AmazonLinuxHVM: ami-05b7dbc290217250d
-    #   UbuntuServerHVM: ami-05494b93950efa2fd
-    #   RedHatEnterpriseLinux8: ami-049d8bf763f81a55f
-    #   SUSELinuxEnterpriseServer15: ami-0bafdc5530394c4e8
-Conditions:
-  HasSSHKey: !Not
-    - !Equals
-      - !Ref 'EC2KeyPair'
-      - ''
+      HVM64: ami-08935252a36e25f85
+      HVMG2: ami-0d5299b1c6112c3c7
+    eu-west-2:
+      HVM64: ami-01419b804382064e4
+      HVMG2: NOT_SUPPORTED
+    eu-west-3:
+      HVM64: ami-0dd7e7ed60da8fb83
+      HVMG2: NOT_SUPPORTED
+    eu-central-1:
+      HVM64: ami-0cfbf4f6db41068ac
+      HVMG2: ami-0aa1822e3eb913a11
+    eu-north-1:
+      HVM64: ami-86fe70f8
+      HVMG2: ami-32d55b4c
+    ap-northeast-1:
+      HVM64: ami-00a5245b4816c38e6
+      HVMG2: ami-09d0e0e099ecabba2
+    ap-northeast-2:
+      HVM64: ami-00dc207f8ba6dc919
+      HVMG2: NOT_SUPPORTED
+    ap-northeast-3:
+      HVM64: ami-0b65f69a5c11f3522
+      HVMG2: NOT_SUPPORTED
+    ap-southeast-1:
+      HVM64: ami-05b3bcf7f311194b3
+      HVMG2: ami-0e46ce0d6a87dc979
+    ap-southeast-2:
+      HVM64: ami-02fd0b06f06d93dfc
+      HVMG2: ami-0c0ab057a101d8ff2
+    ap-south-1:
+      HVM64: ami-0ad42f4f66f6c1cc9
+      HVMG2: ami-0244c1d42815af84a
+    us-east-2:
+      HVM64: ami-0cd3dfa4e37921605
+      HVMG2: NOT_SUPPORTED
+    ca-central-1:
+      HVM64: ami-07423fb63ea0a0930
+      HVMG2: NOT_SUPPORTED
+    sa-east-1:
+      HVM64: ami-05145e0b28ad8e0b2
+      HVMG2: NOT_SUPPORTED
+    cn-north-1:
+      HVM64: ami-053617c9d818c1189
+      HVMG2: NOT_SUPPORTED
+    cn-northwest-1:
+      HVM64: ami-0f7937761741dc640
+      HVMG2: NOT_SUPPORTED
 Resources:
-  IamInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: /
-      Roles:
-        - !Ref 'ProfileRole'
-  ProfileRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      ManagedPolicyArns: 
-        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-        - arn:aws:iam::aws:policy/AmazonSSMFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
   EC2Instance:
-    Type: AWS::EC2::Instance
+    Type: 'AWS::EC2::Instance'
     Properties:
-      # BlockDeviceMappings:
-      #   - DeviceName: /dev/xvda
-      #     Ebs:
-      #       DeleteOnTermination: !Ref 'BlockDeviceDeleteOnTermination'
-      #       VolumeSize: !Ref 'EC2VolumeSize'
-      #       VolumeType: !Ref 'EC2VolumeType'
-      # EbsOptimized: !Ref 'EBSOptimized'
       UserData: !Base64
         Fn::Sub: |
           #!/bin/bash -xe
-          cd /opt/apache-tomcat-8.5.35/webapps/
+          mkdir -p /opt/actions-pg
+          cd /opt/actions-pg
           aws s3 cp s3://blackdex-github-actions/actions-pg .
           sleep 5
+          chmod +x actions-pg
           actions-pg & disown
-      InstanceType: !Ref 'InstanceType'
-      IamInstanceProfile: !Ref 'IamInstanceProfile'
+      InstanceType: !Ref InstanceType
+      SecurityGroups:
+        - !Ref InstanceSecurityGroup
+      KeyName: !Ref KeyName
       ImageId: !FindInMap
-        - LatestAmiMap
+        - AWSRegionArch2AMI
         - !Ref 'AWS::Region'
-        - !Ref 'OperatingSystem'
-      NetworkInterfaces:
-        # - GroupSet:
-        #     - !Ref 'SecurityGroup'
-          AssociatePublicIpAddress: true
-          DeviceIndex: '0'
-          DeleteOnTermination: true
-          SubnetId: !Ref 'Subnet'
-      KeyName: !If
-        - HasSSHKey
-        - !Ref 'EC2KeyPair'
-        - !Ref 'AWS::NoValue'
-      Tags:
-        - Key: Name
-          Value: !Ref 'InstanceName'
+        - !FindInMap
+          - AWSInstanceType2Arch
+          - !Ref InstanceType
+          - Arch
+  InstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access + port 4080
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '4080'
+          ToPort: '4080'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: !Ref SSHLocation
 Outputs:
-  InstancePrivateIp:
-    Description: Instance Private IP Address.
-    Value: !GetAtt 'EC2Instance.PrivateIp'
   InstanceId:
     Description: InstanceId of the newly created EC2 instance
-    Value: !Ref 'EC2Instance'
-  AvailabilityZone:
+    Value: !Ref EC2Instance
+  AZ:
     Description: Availability Zone of the newly created EC2 instance
-    Value: !GetAtt 'EC2Instance.AvailabilityZone'
-  # SecurityGroupID:
-  #   Description: Security Group of the newly created EC2 instance
-  #   Value: !Ref 'SecurityGroup'
-  Role:
-    Description: Role Created
-    Value: !Ref 'ProfileRole'
+    Value: !GetAtt
+      - EC2Instance
+      - AvailabilityZone
+  PublicDNS:
+    Description: Public DNSName of the newly created EC2 instance
+    Value: !GetAtt
+      - EC2Instance
+      - PublicDnsName
+  PublicIP:
+    Description: Public IP address of the newly created EC2 instance
+    Value: !GetAtt
+      - EC2Instance
+      - PublicIp
+  InstancePrivateIp:
+    Description: Instance Private IP Address
+    Value: !GetAtt
+      - EC2Instance
+      - PrivateIp

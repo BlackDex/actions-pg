@@ -52,3 +52,4 @@ jobs:
           name: GitubActions
           template: ec2instance_linux_master_template.yaml
           parameter-overrides: "InstanceType=t2.micro,KeyName=Mathijs-Laptop"
+          capabilities: CAPABILITY_NAMED_IAM

@@ -382,7 +382,7 @@ Resources:
           mkdir -v -p /opt/actions-pg
           cd /opt/actions-pg
           aws s3 cp s3://blackdex-github-actions/actions-pg .
-          sleep 5
+          sleep 4
           chmod -v +x actions-pg
           nohup /opt/actions-pg/actions-pg & disown
       InstanceType: !Ref InstanceType

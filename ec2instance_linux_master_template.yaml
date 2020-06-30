@@ -355,34 +355,17 @@ Resources:
       Path: /
       Roles:
         - !Ref 'ProfileRole'
-  ProfileRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      ManagedPolicyArns:
-        # - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
-        # - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-        # - arn:aws:iam::aws:policy/AmazonSSMFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
   EC2Instance:
     Type: 'AWS::EC2::Instance'
     Properties:
       UserData: !Base64
         Fn::Sub: |
           #!/bin/bash -xe
-          mkdir -p /opt/actions-pg
+          mkdir -v -p /opt/actions-pg
           cd /opt/actions-pg
           aws s3 cp s3://blackdex-github-actions/actions-pg .
           sleep 5
-          chmod +x actions-pg
+          chmod -v +x actions-pg
           nohup /opt/actions-pg/actions-pg & disown
       InstanceType: !Ref InstanceType
       SecurityGroups:

@@ -368,9 +368,9 @@ Resources:
             Action:
               - sts:AssumeRole
       ManagedPolicyArns: 
-        # - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
-        # - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-        # - arn:aws:iam::aws:policy/AmazonSSMFullAccess
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        - arn:aws:iam::aws:policy/AmazonSSMFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
       RoleName: !Sub '${AWS::StackName}-EC2Role'
   EC2Instance:
